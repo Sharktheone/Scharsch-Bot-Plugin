@@ -1,0 +1,4 @@
+name: ScharschBot
+version: '${project.version}'
+main: de.scharschbot.plugin.Plugin
+api-version: 1.19
