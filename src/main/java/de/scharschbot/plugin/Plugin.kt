@@ -30,7 +30,6 @@ class Plugin : JavaPlugin(), Listener, CommandExecutor {
     }
     private fun sendValues(Data: String){
         val httpClient = HttpClients.createDefault()
-        logger.info(Data)
 
         try {
             val request = HttpPost(config.getString("URL"))
@@ -42,44 +41,44 @@ class Plugin : JavaPlugin(), Listener, CommandExecutor {
             request.addHeader(BasicScheme().authenticate(creds, request, null))
 
             val response: CloseableHttpResponse = httpClient.execute(request)
-            logger.info(response.statusLine.statusCode.toString())
             if (response.statusLine.statusCode != 200) {
                 logger.warning("Failure sending data to discord bot: " + response.statusLine.reasonPhrase)
             }
             response.close()
             httpClient.close()
         } catch (e: Exception) {
-            logger.warning("Failed to send HTTP Request")
+            logger.warning("Failed to send HTTP Request: " + e.message)
         }
 
 
 
     }
+    private val serverName = config.getString("ServerName")
     @EventHandler
     fun chatMessage(event: AsyncPlayerChatEvent) {
-        val chatJson = "{\"name\":\"" + event.player.name + "\", \"value\":\"" + event.message + "\", \"type\":\"chat\"}"
+        val chatJson = "{\"name\":\"" + event.player.name + "\", \"value\":\"" + event.message + "\", \"type\":\"chat\", \"server\":\"" + serverName + "\"}"
         sendValues(chatJson)
     }
     @EventHandler
     fun playerDeath(event: PlayerDeathEvent){
-        val deathJson = "{\"name\":\"" + event.player.name + "\", \"value\":\"" + event.deathMessage + "\", \"type\":\"death\"}"
+        val deathJson = "{\"name\":\"" + event.player.name + "\", \"value\":\"" + event.deathMessage + "\", \"type\":\"death\", \"server\":\"" + serverName + "\"}"
         sendValues(deathJson)
     }
     @EventHandler
     fun playerAdvancement(event: PlayerAdvancementDoneEvent){
         if(!event.advancement.key.key.contains("recipes/")) {
-            val advancementJson = "{\"name\":\"" + event.player.name + "\", \"value\":\"" + event.advancement.key.key + "\", \"type\":\"advancement\"}"
+            val advancementJson = "{\"name\":\"" + event.player.name + "\", \"value\":\"" + event.advancement.key.key + "\", \"type\":\"advancement\", \"server\":\"" + serverName + "\"}"
             sendValues(advancementJson)
         }
     }
     @EventHandler
     fun playerJoin(event: PlayerJoinEvent){
-        val joinJson = "{\"name\":\"" + event.player.name + "\", \"type\":\"join\"}"
+        val joinJson = "{\"name\":\"" + event.player.name + "\", \"type\":\"join\", \"server\":\"" + serverName + "\"}"
         sendValues(joinJson)
     }
     @EventHandler
     fun playerQuit(event: PlayerQuitEvent){
-        val quitJson = "{\"name\":\"" + event.player.name + "\", \"type\":\"quit\"}"
+        val quitJson = "{\"name\":\"" + event.player.name + "\", \"type\":\"quit\", \"server\":\"" + serverName + "\"}"
         sendValues(quitJson)
     }
 
