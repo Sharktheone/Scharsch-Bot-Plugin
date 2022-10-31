@@ -41,7 +41,7 @@ class Plugin : JavaPlugin(), Listener, CommandExecutor {
             request.addHeader(BasicScheme().authenticate(creds, request, null))
 
             val response: CloseableHttpResponse = httpClient.execute(request)
-            if (response.statusLine.statusCode != 200) {
+            if (!(response.statusLine.statusCode == 204 || response.statusLine.statusCode == 200)) {
                 logger.warning("Failure sending data to discord bot: " + response.statusLine.reasonPhrase)
             }
             response.close()
@@ -49,9 +49,6 @@ class Plugin : JavaPlugin(), Listener, CommandExecutor {
         } catch (e: Exception) {
             logger.warning("Failed to send HTTP Request: " + e.message)
         }
-
-
-
     }
     private val serverName = config.getString("ServerName")
     @EventHandler
