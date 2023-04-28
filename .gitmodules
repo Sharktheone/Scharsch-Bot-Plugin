@@ -1,0 +1,4 @@
+[submodule "core/core"]
+	path = core/core
+	url = https://github.com/Sharktheone/Scharsch-Bot-Plugin-Core
+	branch = dev
