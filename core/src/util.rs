@@ -2,6 +2,7 @@ use std::ops::Deref;
 use jni::JNIEnv;
 use jni::objects::{JObject};
 use scharschbot_core::jni_utils::{call_stacking, convert_string, JniFn, JSTRING};
+use crate::CONFIG;
 
 pub(crate) fn extract_player(mut env: &mut JNIEnv, event: JObject) -> String {
     let fns = [
@@ -18,9 +19,9 @@ pub(crate) fn extract_player(mut env: &mut JNIEnv, event: JObject) -> String {
             args: &[],
         }
     ];
-    let player_obj = call_stacking(&mut env, event, &fns);
+    let player_obj = call_stacking(&mut env, &event, &fns);
 
-    convert_string(&mut env, player_obj)
+    convert_string(&mut env, &player_obj)
 }
 
 pub(crate) fn extract_message(mut env: &mut JNIEnv, event: JObject) -> String {
@@ -38,7 +39,16 @@ pub(crate) fn extract_message(mut env: &mut JNIEnv, event: JObject) -> String {
             args: &[],
         }
     ];
-    let message_obj = call_stacking(&mut env, event, &fns);
+    let message_obj = call_stacking(&mut env, &event, &fns);
 
-    convert_string(&mut env, message_obj)
+    convert_string(&mut env, &message_obj)
+}
+
+pub(crate) fn get_server_name() -> String {
+    unsafe {
+        match CONFIG.as_ref() {
+            Some(config) => config.server_name.clone(),
+            None => "Unknown".to_string()
+        }
+    }
 }
