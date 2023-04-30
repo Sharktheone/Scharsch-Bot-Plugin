@@ -14,9 +14,9 @@ import java.util.logging.Logger
 import java.io.File
 import java.nio.file.Files
 
-class Events(private val logger: Logger): JavaPlugin(), Listener {
+class Events(private val logger: Logger): Listener {
     init {
-        val libName = "libscharsch_bot_velocity"
+        val libName = "libscharsch_bot_plugin"
         var libExtension = ".so"
 
         val osName = System.getProperty("os.name")
@@ -45,8 +45,6 @@ class Events(private val logger: Logger): JavaPlugin(), Listener {
             onInitialize()
         }.start() // TODO: Do threading in Rust
     }
-
-    private var ws_ptr: Long = 0
 
     private external fun onInitialize()
 
