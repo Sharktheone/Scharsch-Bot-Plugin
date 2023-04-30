@@ -1,15 +1,37 @@
-use jni::JNIEnv;
 use jni::objects::{JObject, JValue};
-use scharschbot_core::jni_utils::{make_signature};
+use scharschbot_core::jni_utils::get_env;
 use scharschbot_core::plugin::logger::{set_loggers};
+use crate::CLASS;
 
-fn log(msg: &str, env: &mut JNIEnv, class: &JObject, method: &str) -> Result<(), String> {
-    let msg_str:JObject = env.new_string(msg).unwrap().into();
-    let logger = match env.get_field(&class, "logger", make_signature(&"java.util.logging.Logger".to_string())) {
-        Ok(logger) => match logger.l() {
-            Ok(logger) => logger,
-            Err(e) => {
-                return Err(format!("Error converting logger to object: {}", e))
+fn log(msg: &str, method: &str) -> Result<(), String> {
+    let mut env = match get_env() {
+        Ok(env) => env,
+        Err(_) => return Err("No env".to_string()),
+    };
+
+    let class = unsafe {
+        match CLASS.as_mut() {
+            Some(class) => class,
+            None => return Err("No class".to_string()),
+        }
+    };
+
+
+    let msg_str:JObject = match env.new_string(msg) {
+        Ok(msg_str) => msg_str.into(),
+        Err(e) => return Err(format!("Error creating string: {}", e)),
+    };
+
+    let logger = match env.get_field(class, "logger", "Ljava.util.logging.Logger;") {
+        Ok(logger) => {
+
+            match logger.l() {
+                Ok(logger) => {
+                    logger
+                }
+                Err(e) => {
+                    return Err(format!("Error converting logger to object: {}", e));
+                }
             }
         }
         Err(e) => {
@@ -19,20 +41,18 @@ fn log(msg: &str, env: &mut JNIEnv, class: &JObject, method: &str) -> Result<(),
 
     match env.call_method(logger, method, "(Ljava/lang/String;)V", &[JValue::Object(msg_str.as_ref())]){
         Ok(_) => Ok(()),
-        Err(e) => {
-            return Err(format!("Error calling logger: {}", e));
-        }
+        Err(e) => Err(format!("Error calling logger: {}", e))
     }
 }
 
-fn info(msg: &str, env: &mut JNIEnv, class: &JObject) -> Result<(), String> {
-    log(msg, env, class, "info")
+fn info(msg: &str) -> Result<(), String> {
+    log(msg,"info")
 }
-fn warn(msg: &str, env: &mut JNIEnv, class: &JObject) -> Result<(), String> {
-    log(msg, env, class, "warn")
+fn warn(msg: &str) -> Result<(), String> {
+    log(msg,"warn")
 }
-fn error(msg: &str, env: &mut JNIEnv, class: &JObject) -> Result<(), String> {
-    log(msg, env, class, "error")
+fn error(msg: &str) -> Result<(), String> {
+    log(msg,"error")
 }
 
 pub fn set() {
