@@ -22,7 +22,7 @@ fn log(msg: &str, method: &str) -> Result<(), String> {
         Err(e) => return Err(format!("Error creating string: {}", e)),
     };
 
-    let logger = match env.get_field(class, "logger", "Ljava.util.logging.Logger;") {
+    let logger = match env.get_field(class, "logger", "Ljava/util/logging/Logger;") {
         Ok(logger) => {
 
             match logger.l() {
