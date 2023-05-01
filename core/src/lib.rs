@@ -9,15 +9,15 @@ use scharschbot_core::config::load::load_config;
 use scharschbot_core::config::config_format::Config;
 use scharschbot_core::websocket::websocket::connect_ws;
 use scharschbot_core::plugin::logger::{info, error};
-use scharschbot_core::events::mc_events::{player_join, player_leave, player_chat};
-use crate::util::{extract_message, extract_player, get_server_name};
+use scharschbot_core::events::mc_events::{player_join, player_leave, player_chat, player_death, player_advancement};
+use crate::util::{extract_death_message, extract_message, extract_player, get_server_name, extract_advancement};
 
 static mut CONFIG: Option<Config> = None;
 
 pub static mut CLASS: Option<JClass<'static>> = None;
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(mut env: JNIEnv, class: JClass) {
+pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(_: JNIEnv, _: JClass) {
     logger::set();
     info(format!("Loading Config!"));
     let config = match load_config() {
@@ -61,10 +61,20 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerChat(_: JNIEn
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerDeath(_: JNIEnv, _: JClass, _event: JObject) {}
+pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerDeath(_: JNIEnv, _: JClass, _event: JObject) {
+    let name = extract_player(&_event);
+    let death_message = extract_death_message(&_event);
+    player_death(name, death_message, get_server_name());
+
+}
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerAdvancement(_: JNIEnv, _: JClass, _event: JObject) {}
+pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerAdvancement(_: JNIEnv, _: JClass, _event: JObject) {
+    let name = extract_player(&_event);
+    let advancement = extract_advancement(&_event);
+    player_advancement(name, advancement, get_server_name());
+
+}
 
 #[no_mangle]
 pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onShutdown(_: JNIEnv, _: JClass, event: JObject) {

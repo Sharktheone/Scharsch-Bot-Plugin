@@ -42,6 +42,52 @@ pub(crate) fn extract_message(event: &JObject) -> String {
     convert_string(&message_obj)
 }
 
+pub(crate) fn extract_death_message(event: &JObject) -> String {
+    let fns = [
+        JniFn {
+            name: "deathMessage",
+            input: &[],
+            output: "net.kyori.adventure.text.Component",
+            args: &[],
+        },
+        JniFn {
+            name: "toString",
+            input: &[],
+            output: JSTRING,
+            args: &[],
+        }
+    ];
+    let message_obj = call_stacking(event, &fns);
+
+    convert_string(&message_obj)
+}
+
+pub(crate) fn extract_advancement(event : &JObject) -> String {
+    let fns = [
+        JniFn {
+            name: "getAdvancement",
+            input: &[],
+            output: "org.bukkit.advancement.Advancement",
+            args: &[],
+        },
+        JniFn {
+            name: "getKey",
+            input: &[],
+            output: "org.bukkit.NamespacedKey",
+            args: &[],
+        },
+        JniFn {
+            name: "getKey",
+            input: &[],
+            output: JSTRING,
+            args: &[],
+        }
+    ];
+    let message_obj = call_stacking(event, &fns);
+
+    convert_string(&message_obj)
+}
+
 pub(crate) fn get_server_name() -> String {
     unsafe {
         match CONFIG.as_ref() {
