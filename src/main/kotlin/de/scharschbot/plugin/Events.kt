@@ -9,7 +9,6 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
 import org.bukkit.event.server.PluginDisableEvent
-import org.bukkit.plugin.java.JavaPlugin
 import java.util.logging.Logger
 import java.io.File
 import java.nio.file.Files
