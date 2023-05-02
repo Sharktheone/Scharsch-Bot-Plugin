@@ -1,5 +1,6 @@
 mod logger;
 mod util;
+mod component;
 
 extern crate jni;
 
@@ -10,6 +11,7 @@ use scharschbot_core::config::config_format::Config;
 use scharschbot_core::websocket::websocket::connect_ws;
 use scharschbot_core::plugin::logger::{info, error};
 use scharschbot_core::events::mc_events::{player_join, player_leave, player_chat, player_death, player_advancement};
+use scharschbot_core::jni_utils::set_vm;
 use crate::util::{extract_death_message, extract_message, extract_player, get_server_name, extract_advancement};
 
 static mut CONFIG: Option<Config> = None;
@@ -17,7 +19,14 @@ static mut CONFIG: Option<Config> = None;
 pub static mut CLASS: Option<JClass<'static>> = None;
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(_: JNIEnv, _: JClass) {
+pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNIEnv, _: JClass) {
+    match env.get_java_vm() {
+        Ok(vm) => set_vm(vm),
+        Err(err) => {
+            error(format!("Error getting java vm: {}", err));
+        }
+    };
+
     logger::set();
     info(format!("Loading Config!"));
     let config = match load_config() {
