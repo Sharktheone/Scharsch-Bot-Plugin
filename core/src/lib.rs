@@ -1,6 +1,5 @@
 mod logger;
 mod util;
-mod component;
 
 extern crate jni;
 
