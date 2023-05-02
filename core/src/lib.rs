@@ -73,22 +73,22 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerChat(_: JNIEn
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerDeath(_: JNIEnv, _: JClass, _event: JObject) {
-    let name = extract_player(&_event);
-    let death_message = extract_death_message(&_event);
+pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerDeath(_: JNIEnv, _: JClass, event: JObject) {
+    let name = extract_player(&event);
+    let death_message = extract_death_message(&event);
     player_death(name, death_message, get_server_name());
 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerAdvancement(_: JNIEnv, _: JClass, _event: JObject) {
-    let name = extract_player(&_event);
-    let advancement = extract_advancement(&_event);
+pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerAdvancement(_: JNIEnv, _: JClass, event: JObject) {
+    let name = extract_player(&event);
+    let advancement = extract_advancement(&event);
     player_advancement(name, advancement, get_server_name());
 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onShutdown(_: JNIEnv, _: JClass, event: JObject) {
+pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onShutdown(_: JNIEnv, _: JClass, _: JObject) {
     // TODO: Close websocket
 }
