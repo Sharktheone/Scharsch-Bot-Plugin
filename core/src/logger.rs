@@ -39,7 +39,22 @@ fn log(msg: &str, method: &str) -> Result<(), String> {
         }
     };
 
-    match env.call_method(logger, method, "(Ljava/lang/String;)V", &[JValue::Object(msg_str.as_ref())]){
+    let log_level = match method {
+        "info" => "INFO",
+        "warn" => "WARNING",
+        "error" => "SEVERE",
+        _ => return Err("Unknown log level".to_string())
+    };
+
+    let level = match env.get_static_field("java/util/logging/Level", log_level, "Ljava/util/logging/Level;") {
+        Ok(level) => match level.l() {
+            Ok(level) => level,
+            Err(e) => return Err(format!("Error converting level to object: {}", e))
+        }
+        Err(e) => return Err(format!("Error getting level: {}", e))
+    };
+
+    match env.call_method(logger, "log", "(Ljava/util/logging/Level;Ljava/lang/String;)V", &[JValue::Object(&level), JValue::Object(&msg_str)]){
         Ok(_) => Ok(()),
         Err(e) => Err(format!("Error calling logger: {}", e))
     }
