@@ -1,5 +1,6 @@
 mod logger;
 mod util;
+mod whitelist;
 
 extern crate jni;
 
@@ -32,13 +33,8 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNI
 
     logger::set();
     info(format!("Loading Config!"));
-    let config = match load_config() {
-        Ok(config) => {
-            unsafe {
-                CONFIG = Some(config.clone());
-                config
-            }
-        }
+    match load_config() {
+        Ok(_) => {}
         Err(err) => {
             error(format!("Error loading config: {}", err));
             return;
@@ -47,7 +43,7 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNI
 
     info("Connecting to websocket!".to_string());
 
-    match connect_ws(config) {
+    match connect_ws() {
         Ok(_) => info(format!("Connected to websocket!")),
         Err(err) => error(format!("Error connecting to websocket: {}", err)),
     };
