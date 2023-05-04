@@ -44,7 +44,7 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNI
     info("Connecting to websocket!".to_string());
 
     match connect_ws() {
-        Ok(_) => info(format!("Connected to websocket!")),
+        Ok(_) => {},
         Err(err) => error(format!("Error connecting to websocket: {}", err)),
     };
 }
