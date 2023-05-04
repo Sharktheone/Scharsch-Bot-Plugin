@@ -1,0 +1,153 @@
+use std::fs::File;
+use std::io::Write;
+use std::path::Path;
+use scharschbot_core::jni_utils::get_env;
+use serde::{Deserialize, Serialize};
+use scharschbot_core::plugin::logger::error;
+
+
+const WHITELIST_PATH: &str = "whitelist.json";
+
+
+pub(crate) fn whitelist_add(name: String, uuid: String) {
+    let mut whitelist = match get_whitelist() {
+        Ok(whitelist) => whitelist,
+        Err(e) => {
+            error(format!("Error getting whitelist: {:?}", e));
+            return;
+        }
+    };
+
+    let entry = WhitelistEntry {
+        name,
+        uuid,
+    };
+
+    whitelist.push(entry);
+
+    match save_whitelist(whitelist) {
+        Ok(_) => {},
+        Err(e) => {
+            error(format!("Error saving whitelist: {:?}", e));
+            return;
+        }
+    }
+}
+
+pub(crate) fn whitelist_remove(name: String) {
+let mut whitelist = match get_whitelist() {
+        Ok(whitelist) => whitelist,
+        Err(e) => {
+            error(format!("Error getting whitelist: {:?}", e));
+            return;
+        }
+    };
+
+    whitelist.retain(|entry| entry.name != name);
+
+    match save_whitelist(whitelist) {
+        Ok(_) => {},
+        Err(e) => {
+            error(format!("Error saving whitelist: {:?}", e));
+            return;
+        }
+    }
+}
+
+fn get_whitelist() -> Result<Vec<WhitelistEntry>, ()> {
+    let whitelist_path = Path::new(WHITELIST_PATH);
+    let whitelist_file = match File::open(&whitelist_path) {
+        Ok(file) => file,
+        Err(e) => {
+            print_whitelist_not_found();
+            return Err(());
+        }
+    };
+
+    let whitelist: Vec<WhitelistEntry> = match serde_json::from_reader(whitelist_file) {
+        Ok(whitelist) => whitelist,
+        Err(e) => {
+            error(format!("Error parsing whitelist file: {}", e));
+            return Err(());
+        }
+    };
+
+    Ok(whitelist)
+}
+
+fn save_whitelist(whitelist: Vec<WhitelistEntry>) -> Result<(), ()> {
+    let whitelist_path = Path::new(WHITELIST_PATH);
+    let mut whitelist_file = match File::create(&whitelist_path) {
+        Ok(file) => file,
+        Err(e) => {
+            error(format!("Error creating whitelist file: {}", e));
+            return Err(());
+        }
+    };
+    let whitelist_string = match serde_json::to_string(&whitelist) {
+        Ok(string) => string,
+        Err(e) => {
+            error(format!("Error serializing whitelist: {}", e));
+            return Err(());
+        }
+    };
+    match whitelist_file.write(whitelist_string.as_bytes()) {
+        Ok(_) => {
+            match reload_whitelist() {
+                Ok(_) => Ok(()),
+                Err(e) => {
+                    error(format!("Error reloading whitelist: {:?}", e));
+                    return Err(());
+                }
+            }
+        },
+        Err(e) => {
+            error(format!("Error writing whitelist file: {}", e));
+            Err(())
+        }
+    }
+}
+
+
+fn reload_whitelist() -> Result<(), ()> {
+    let mut env = match get_env() {
+        Ok(env) => env,
+        Err(e) => {
+            error(format!("Error getting env: {:?}", e));
+            return Err(());
+        }
+    };
+
+    let mut bukkit = match env.find_class("org/bukkit/Bukkit") {
+        Ok(bukkit) => bukkit,
+        Err(e) => {
+            error(format!("Error getting Bukkit class: {:?}", e));
+            return Err(());
+        }
+    };
+
+    match env.call_static_method(bukkit, "reloadWhitelist", "()V", &[]) {
+        Ok(_) => Ok(()),
+        Err(e) => {
+            error(format!("Error calling reloadWhitelist: {:?}", e));
+            Err(())
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct WhitelistEntry {
+    uuid: String,
+    name: String,
+}
+
+fn print_whitelist_not_found() {
+    let msg = r#"
+    ╭─────────────────────────────────────────────────────────────────╮
+    │                                                                 │
+    │                    Whitelist file not found!                    │
+    │          The Scharschbot whitelist function won't work          │
+    │                                                                 │
+    ╰─────────────────────────────────────────────────────────────────╯"#;
+    error(msg);
+}
