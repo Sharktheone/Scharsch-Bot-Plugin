@@ -4,6 +4,7 @@ use std::path::Path;
 use scharschbot_core::jni_utils::get_env;
 use serde::{Deserialize, Serialize};
 use scharschbot_core::plugin::logger::error;
+use crate::bukkit::get_bukkit;
 
 
 const WHITELIST_PATH: &str = "whitelist.json";
@@ -58,7 +59,7 @@ fn get_whitelist() -> Result<Vec<WhitelistEntry>, ()> {
     let whitelist_path = Path::new(WHITELIST_PATH);
     let whitelist_file = match File::open(&whitelist_path) {
         Ok(file) => file,
-        Err(e) => {
+        Err(_) => {
             print_whitelist_not_found();
             return Err(());
         }
@@ -118,12 +119,9 @@ fn reload_whitelist() -> Result<(), ()> {
         }
     };
 
-    let mut bukkit = match env.find_class("org/bukkit/Bukkit") {
+    let mut bukkit = match get_bukkit(){
         Ok(bukkit) => bukkit,
-        Err(e) => {
-            error(format!("Error getting Bukkit class: {:?}", e));
-            return Err(());
-        }
+        Err(()) => return Err(())
     };
 
     match env.call_static_method(bukkit, "reloadWhitelist", "()V", &[]) {
