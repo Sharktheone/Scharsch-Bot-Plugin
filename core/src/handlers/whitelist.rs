@@ -23,6 +23,10 @@ pub(crate) fn whitelist_add(name: String, uuid: String) -> Result<(), String> {
         uuid,
     };
 
+    if is_on_whitelist(Some(&entry.name), Some(&entry.uuid)) {
+        return Ok(());
+    }
+
     whitelist.push(entry);
 
     match save_whitelist(whitelist) {
@@ -123,6 +127,30 @@ fn reload_whitelist() -> Result<(), ()> {
             Err(())
         }
     }
+}
+
+fn is_on_whitelist(name: Option<&String>, uuid: Option<&String>) -> bool {
+    let whitelist = match get_whitelist() {
+        Ok(whitelist) => whitelist,
+        Err(_) => {
+            return false;
+        }
+    };
+
+    for entry in whitelist {
+        if let Some(name) = name.clone() {
+            if entry.name == *name {
+                return true;
+            }
+        }
+        if let Some(uuid) = uuid.clone() {
+            if entry.uuid == *uuid {
+                return true;
+            }
+        }
+    }
+
+    false
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
