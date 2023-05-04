@@ -77,7 +77,7 @@ fn save_whitelist(whitelist: Vec<WhitelistEntry>) -> Result<(), ()> {
             return Err(());
         }
     };
-    let whitelist_string = match serde_json::to_string(&whitelist) {
+    let whitelist_string = match serde_json::to_string_pretty(&whitelist) {
         Ok(string) => string,
         Err(e) => {
             error(format!("Error serializing whitelist: {}", e));
