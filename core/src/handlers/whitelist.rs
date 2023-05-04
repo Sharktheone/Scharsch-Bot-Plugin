@@ -10,12 +10,11 @@ use crate::handlers::bukkit::get_bukkit;
 const WHITELIST_PATH: &str = "whitelist.json";
 
 
-pub(crate) fn whitelist_add(name: String, uuid: String) {
+pub(crate) fn whitelist_add(name: String, uuid: String) -> Result<(), String> {
     let mut whitelist = match get_whitelist() {
         Ok(whitelist) => whitelist,
-        Err(e) => {
-            error(format!("Error getting whitelist: {:?}", e));
-            return;
+        Err(_) => {
+            return Err("Error getting whitelist".to_string());
         }
     };
 
@@ -27,31 +26,24 @@ pub(crate) fn whitelist_add(name: String, uuid: String) {
     whitelist.push(entry);
 
     match save_whitelist(whitelist) {
-        Ok(_) => {},
-        Err(e) => {
-            error(format!("Error saving whitelist: {:?}", e));
-            return;
-        }
+        Ok(_) => Ok(()),
+        Err(_) => Err("Error saving whitelist".to_string())
     }
 }
 
-pub(crate) fn whitelist_remove(name: String) {
+pub(crate) fn whitelist_remove(name: String) -> Result<(), String> {
 let mut whitelist = match get_whitelist() {
         Ok(whitelist) => whitelist,
-        Err(e) => {
-            error(format!("Error getting whitelist: {:?}", e));
-            return;
+        Err(_) => {
+            return Err("Error getting whitelist".to_string());
         }
     };
 
     whitelist.retain(|entry| entry.name != name);
 
     match save_whitelist(whitelist) {
-        Ok(_) => {},
-        Err(e) => {
-            error(format!("Error saving whitelist: {:?}", e));
-            return;
-        }
+        Ok(_) => Ok(()),
+        Err(_) => Err("Error saving whitelist".to_string())
     }
 }
 
