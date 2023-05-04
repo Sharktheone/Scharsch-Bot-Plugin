@@ -1,6 +1,6 @@
 mod logger;
 mod util;
-mod whitelist;
+mod handlers;
 
 extern crate jni;
 

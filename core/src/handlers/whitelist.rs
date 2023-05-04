@@ -4,7 +4,7 @@ use std::path::Path;
 use scharschbot_core::jni_utils::get_env;
 use serde::{Deserialize, Serialize};
 use scharschbot_core::plugin::logger::error;
-use crate::bukkit::get_bukkit;
+use crate::handlers::bukkit::get_bukkit;
 
 
 const WHITELIST_PATH: &str = "whitelist.json";
