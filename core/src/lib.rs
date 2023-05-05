@@ -10,7 +10,7 @@ use jni::objects::{JClass, JObject};
 use scharschbot_core::config::load::load_config;
 use scharschbot_core::events::handler::set_handlers;
 use scharschbot_core::websocket::websocket::connect_ws;
-use scharschbot_core::plugin::logger::{info, error};
+use scharschbot_core::plugin::logger::{info, error, logger_pump};
 use scharschbot_core::events::mc_events::{player_join, player_leave, player_chat, player_death, player_advancement};
 use scharschbot_core::jni_utils::{set_class, set_vm};
 use crate::util::{extract_death_message, extract_message, extract_player, get_server_name, extract_advancement};
@@ -29,39 +29,41 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNI
     set_class(class);
     logger::set();
 
-    set_handlers(
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(&whitelist_add),
-        Some(&whitelist_remove),
-        None
-    );
-    info(format!("Loading Config!"));
-    match load_config() {
-        Ok(_) => {}
-        Err(err) => {
-            error(format!("Error loading config: {}", err));
-            return;
-        }
-    };
-
-    info("Connecting to websocket!".to_string());
-
     thread::spawn(move || {
+        set_handlers(
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(&whitelist_add),
+            Some(&whitelist_remove),
+            None
+        );
+        info(format!("Loading Config!"));
+        match load_config() {
+            Ok(_) => {}
+            Err(err) => {
+                error(format!("Error loading config: {}", err));
+                return;
+            }
+        };
+
+        info("Connecting to websocket!".to_string());
+
         match connect_ws() {
             Ok(_) => {},
             Err(err) => error(format!("Error connecting to websocket: {}", err)),
         };
     });
+
+    logger_pump();
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerJoin(_: JNIEnv, _class: JClass, event: JObject) {
+pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerJoin(_: JNIEnv, _: JClass, event: JObject) {
     let name = extract_player(&event);
     player_join(name, get_server_name());
 }
