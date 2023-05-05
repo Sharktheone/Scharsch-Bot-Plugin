@@ -4,6 +4,7 @@ mod handlers;
 
 extern crate jni;
 
+use std::thread;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject};
 use scharschbot_core::config::load::load_config;
@@ -51,10 +52,12 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNI
 
     info("Connecting to websocket!".to_string());
 
-    match connect_ws() {
-        Ok(_) => {},
-        Err(err) => error(format!("Error connecting to websocket: {}", err)),
-    };
+    thread::spawn(move || {
+        match connect_ws() {
+            Ok(_) => {},
+            Err(err) => error(format!("Error connecting to websocket: {}", err)),
+        };
+    });
 }
 
 #[no_mangle]
