@@ -45,13 +45,7 @@ pub(crate) fn extract_message(event: &JObject) -> String {
 pub(crate) fn extract_death_message(event: &JObject) -> String {
     let fns = [
         JniFn {
-            name: "deathMessage",
-            input: &[],
-            output: "net.kyori.adventure.text.Component",
-            args: &[],
-        },
-        JniFn {
-            name: "toString",
+            name: "getDeathMessage", // TODO: Find alternative for deprecated method
             input: &[],
             output: JSTRING,
             args: &[],
