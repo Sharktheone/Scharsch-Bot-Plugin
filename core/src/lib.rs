@@ -21,16 +21,14 @@ pub static mut CLASS: Option<JClass<'static>> = None;
 #[no_mangle]
 pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNIEnv, class: JClass<'static>) {
     match env.get_java_vm() {
-        Ok(vm) => set_vm(vm),
+        Ok(vm) => {
+            set_vm(vm);
+        },
         Err(err) => {
             error(format!("Error getting java vm: {}", err));
         }
-    };
-
-    unsafe {
-        CLASS = Some(class);
     }
-
+    set_class(class);
     logger::set();
     info(format!("Loading Config!"));
     match load_config() {
