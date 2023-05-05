@@ -1,6 +1,6 @@
 use jni::objects::{JObject};
 use scharschbot_core::jni_utils::{call_stacking, convert_string, JniFn, JSTRING};
-use crate::CONFIG;
+use scharschbot_core::config::load::CONFIG;
 
 pub(crate) fn extract_player(event: &JObject) -> String {
     let fns = [
