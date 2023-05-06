@@ -115,11 +115,10 @@ fn reload_whitelist() -> Result<(), ()> {
         }
     };
 
-    let mut bukkit = match get_bukkit(){
+    let bukkit = match get_bukkit(){
         Ok(bukkit) => bukkit,
         Err(()) => return Err(())
     };
-
     match env.call_static_method(bukkit, "reloadWhitelist", "()V", &[]) {
         Ok(_) => Ok(()),
         Err(e) => {

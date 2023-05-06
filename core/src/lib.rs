@@ -94,7 +94,6 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerAdvancement(_
     let name = extract_player(&event);
     let advancement = extract_advancement(&event);
     player_advancement(name, advancement, get_server_name());
-
 }
 
 #[no_mangle]
