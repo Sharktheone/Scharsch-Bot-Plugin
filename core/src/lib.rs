@@ -92,7 +92,10 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerDeath(_: JNIE
 #[no_mangle]
 pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerAdvancement(_: JNIEnv, _: JClass, event: JObject) {
     let name = extract_player(&event);
-    let advancement = extract_advancement(&event);
+    let advancement = match extract_advancement(&event) {
+        Ok(advancement) => advancement,
+        Err(_) => return
+    };
     player_advancement(name, advancement, get_server_name());
 }
 

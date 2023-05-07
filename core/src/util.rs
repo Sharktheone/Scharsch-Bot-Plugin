@@ -1,6 +1,6 @@
 use jni::objects::{JClass, JObject};
 use jni::signature::ReturnType;
-use scharschbot_core::jni_utils::{call_stacking, convert_string, convert_string_or, get_env, JniFn, JSTRING};
+use scharschbot_core::jni_utils::{call_stacking, convert_string, convert_string_result, get_env, JniFn, JSTRING};
 use scharschbot_core::config::load::CONFIG;
 use scharschbot_core::plugin::logger::error;
 
@@ -58,7 +58,7 @@ pub(crate) fn extract_death_message(event: &JObject) -> String {
     convert_string(&message_obj)
 }
 
-pub(crate) fn extract_advancement(event : &JObject) -> String {
+pub(crate) fn extract_advancement(event : &JObject) -> Result<String, ()> {
     let fns = [
         JniFn {
             name: "getAdvancement",
@@ -81,11 +81,15 @@ pub(crate) fn extract_advancement(event : &JObject) -> String {
     ];
     let title_obj = call_stacking(event, &fns);
 
+    if title_obj.is_null() {
+        return Err(())
+    }
+
     let mut env = match get_env() {
         Ok(env) => env,
         Err(_) => {
             error("Error getting env");
-            return convert_string_or(&title_obj, "Error getting Advancement");
+            return convert_string_result(&title_obj);
         }
     };
 
@@ -93,7 +97,7 @@ pub(crate) fn extract_advancement(event : &JObject) -> String {
         Ok(class) => class,
         Err(e) => {
             error(format!("Error getting TranslatableComponent class: {}", e));
-            return convert_string_or(&title_obj, "Error getting Advancement");
+            return convert_string_result(&title_obj);
         }
     };
 
@@ -101,7 +105,7 @@ pub(crate) fn extract_advancement(event : &JObject) -> String {
         Ok(is_translatable) => is_translatable,
         Err(e) => {
             error(format!("Error checking if title is translatable: {}", e));
-            return convert_string_or(&title_obj, "Error getting Advancement");
+            return convert_string_result(&title_obj);
         }
     };
 
@@ -110,7 +114,7 @@ pub(crate) fn extract_advancement(event : &JObject) -> String {
             Ok(method) => method,
             Err(e) => {
                 error(format!("Error getting key method: {}", e));
-                return convert_string_or(&title_obj, "Error getting Advancement");
+                return convert_string_result(&title_obj);
             }
         };
         let key_obj = unsafe {
@@ -119,19 +123,19 @@ pub(crate) fn extract_advancement(event : &JObject) -> String {
                     Ok(obj) => obj,
                     Err(e) => {
                         error(format!("Error getting key: {}", e));
-                        return convert_string_or(&title_obj, "Error getting Advancement");
+                        return convert_string_result(&title_obj);
                     }
                 },
                 Err(e) => {
                     error(format!("Error getting key: {}", e));
-                    return convert_string_or(&title_obj, "Error getting Advancement");
+                    return convert_string_result(&title_obj);
                 }
             }
         };
-        return convert_string(&key_obj)
+        return convert_string_result(&key_obj);
     }
 
-    return convert_string_or(&title_obj, "Error getting Advancement");
+    return convert_string_result(&title_obj);
 
 }
 
