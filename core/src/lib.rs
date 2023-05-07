@@ -17,7 +17,7 @@ use crate::util::{extract_death_message, extract_message, extract_player, get_se
 use crate::handlers::whitelist::{whitelist_add, whitelist_remove};
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNIEnv, class: JClass<'static>) {
+pub extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNIEnv, class: JClass<'static>) {
     match env.get_java_vm() {
         Ok(vm) => {
             set_vm(vm);
@@ -63,26 +63,26 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNI
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerJoin(_: JNIEnv, _: JClass, event: JObject) {
+pub extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerJoin(_: JNIEnv, _: JClass, event: JObject) {
     let name = extract_player(&event);
     player_join(name, get_server_name());
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerLeave(_: JNIEnv, _class: JClass, event: JObject) {
+pub extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerLeave(_: JNIEnv, _class: JClass, event: JObject) {
     let name = extract_player(&event);
     player_leave(name, get_server_name());
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerChat(_: JNIEnv, _class: JClass, event: JObject) {
+pub extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerChat(_: JNIEnv, _class: JClass, event: JObject) {
     let name = extract_player(&event);
     let message = extract_message(&event);
     player_chat(name, message, get_server_name());
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerDeath(_: JNIEnv, _: JClass, event: JObject) {
+pub extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerDeath(_: JNIEnv, _: JClass, event: JObject) {
     let name = extract_player(&event);
     let death_message = extract_death_message(&event);
     player_death(name, death_message, get_server_name());
@@ -90,7 +90,7 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerDeath(_: JNIE
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerAdvancement(_: JNIEnv, _: JClass, event: JObject) {
+pub extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerAdvancement(_: JNIEnv, _: JClass, event: JObject) {
     let name = extract_player(&event);
     let advancement = match extract_advancement(&event) {
         Ok(advancement) => advancement,
@@ -100,6 +100,6 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onPlayerAdvancement(_
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onShutdown(_: JNIEnv, _: JClass, _: JObject) {
+pub extern "C" fn Java_de_scharschbot_plugin_Events_onShutdown(_: JNIEnv, _: JClass, _: JObject) {
     // TODO: Close websocket
 }
