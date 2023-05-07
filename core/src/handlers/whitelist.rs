@@ -53,7 +53,7 @@ let mut whitelist = match get_whitelist() {
 
 fn get_whitelist() -> Result<Vec<WhitelistEntry>, ()> {
     let whitelist_path = Path::new(WHITELIST_PATH);
-    let whitelist_file = match File::open(&whitelist_path) {
+    let whitelist_file = match File::open(whitelist_path) {
         Ok(file) => file,
         Err(_) => {
             print_whitelist_not_found();
@@ -74,7 +74,7 @@ fn get_whitelist() -> Result<Vec<WhitelistEntry>, ()> {
 
 fn save_whitelist(whitelist: Vec<WhitelistEntry>) -> Result<(), ()> {
     let whitelist_path = Path::new(WHITELIST_PATH);
-    let mut whitelist_file = match File::create(&whitelist_path) {
+    let mut whitelist_file = match File::create(whitelist_path) {
         Ok(file) => file,
         Err(e) => {
             error(format!("Error creating whitelist file: {}", e));
@@ -94,7 +94,7 @@ fn save_whitelist(whitelist: Vec<WhitelistEntry>) -> Result<(), ()> {
                 Ok(_) => Ok(()),
                 Err(e) => {
                     error(format!("Error reloading whitelist: {:?}", e));
-                    return Err(());
+                    Err(())
                 }
             }
         },
@@ -137,12 +137,12 @@ fn is_on_whitelist(name: Option<&String>, uuid: Option<&String>) -> bool {
     };
 
     for entry in whitelist {
-        if let Some(name) = name.clone() {
+        if let Some(name) = name {
             if entry.name == *name {
                 return true;
             }
         }
-        if let Some(uuid) = uuid.clone() {
+        if let Some(uuid) = uuid {
             if entry.uuid == *uuid {
                 return true;
             }

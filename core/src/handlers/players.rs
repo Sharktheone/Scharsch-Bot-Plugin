@@ -1,4 +1,4 @@
-use jni::objects::JValue;
+use jni::objects::{JString, JValue};
 use scharschbot_core::jni_utils::{call_static_stacking, get_env, JniFn, JSTRING, JVOID};
 use scharschbot_core::plugin::kyori_adventure::component::basic_component;
 use scharschbot_core::plugin::kyori_adventure::parse_component::{parse_component, parse_component_to_legacy};
@@ -74,12 +74,13 @@ pub(crate) fn ban_player(player: String, reason: String, is_component: bool) -> 
     let component = match parse_component_to_legacy(reason, is_component){
         Ok(component) => component,
         Err(_) => {
-            match basic_component("Failed to parse reason, please contact the support for more information".to_string()){
+            let obj = match basic_component("Failed to parse reason, please contact the support for more information".to_string()){
                 Ok(component) => component,
                 Err(_) => {
                     return Err("Error parsing reason".to_string());
                 }
-            }
+            };
+            JString::from(obj)
         }
     };
 

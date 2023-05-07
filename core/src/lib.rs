@@ -42,7 +42,7 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNI
             Some(&whitelist_remove),
             None
         );
-        info(format!("Loading Config!"));
+        info("Loading Config!");
         match load_config() {
             Ok(_) => {}
             Err(err) => {
@@ -51,7 +51,7 @@ pub unsafe extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNI
             }
         };
 
-        info("Connecting to websocket!".to_string());
+        info("Connecting to websocket!");
 
         match connect_ws() {
             Ok(_) => {},

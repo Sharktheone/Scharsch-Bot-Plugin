@@ -135,7 +135,7 @@ pub(crate) fn extract_advancement(event : &JObject) -> Result<String, ()> {
         return convert_string_result(&key_obj);
     }
 
-    return convert_string_result(&title_obj);
+    convert_string_result(&title_obj)
 
 }
 

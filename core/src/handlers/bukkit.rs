@@ -15,7 +15,7 @@ pub(crate) fn get_bukkit() -> Result<JClass<'static>, ()> {
         Ok(bukkit) => Ok(bukkit),
         Err(e) => {
             error(format!("Error getting Bukkit class: {:?}", e));
-            return Err(());
+            Err(())
         }
     }
 }
