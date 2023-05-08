@@ -4,6 +4,12 @@ use scharschbot_core::plugin::kyori_adventure::component::basic_component;
 use scharschbot_core::plugin::kyori_adventure::parse_component::{parse_component, parse_component_to_legacy};
 use crate::handlers::bukkit::get_bukkit;
 
+//TODO: Bot => Server: SendPlayers
+//TODO: Bot => Server: KickPlayer          ✅
+//TODO: Bot => Server: ReportPlayer
+//TODO: Bot => Server: BanPlayer           ✅
+//TODO: Bot => Server: UnbanPlayer
+
 pub(crate) fn kick_player(player: String, reason: String, is_component: bool) -> Result<(), String>{
     let env = match get_env() {
         Ok(env) => env,
