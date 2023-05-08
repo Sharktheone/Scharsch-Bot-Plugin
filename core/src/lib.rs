@@ -31,6 +31,7 @@ pub extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNIEnv, cl
     logger::set();
 
     thread::spawn(move || {
+        thread::sleep(Duration::from_millis(10)); // Wait for the logger_pump to be initialized
         let handlers = Handlers {
             get_players_handler: None,
             kick_player: None,
