@@ -5,10 +5,11 @@ mod handlers;
 extern crate jni;
 
 use std::thread;
+use std::time::Duration;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject};
 use scharschbot_core::config::load::load_config;
-use scharschbot_core::events::handler::set_handlers;
+use scharschbot_core::events::handler::{Handlers, set_handlers};
 use scharschbot_core::websocket::websocket::connect_ws;
 use scharschbot_core::plugin::logger::{info, error, logger_pump};
 use scharschbot_core::events::mc_events::{player_join, player_leave, player_chat, player_death, player_advancement};
@@ -30,18 +31,20 @@ pub extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNIEnv, cl
     logger::set();
 
     thread::spawn(move || {
-        set_handlers(
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(&whitelist_add),
-            Some(&whitelist_remove),
-            None
-        );
+        let handlers = Handlers {
+            get_players_handler: None,
+            kick_player: None,
+            ban_player: None,
+            unban_player: None,
+            send_command: None,
+            send_message: None,
+            send_admin_message: None,
+            add_whitelist: Some(&whitelist_add),
+            remove_whitelist: Some(&whitelist_remove),
+            whitelisted_players: None
+        };
+        set_handlers(handlers);
+
         info("Loading Config!");
         match load_config() {
             Ok(_) => {}
