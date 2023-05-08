@@ -123,3 +123,50 @@ pub(crate) fn ban_player(player: String, reason: String, is_component: bool) -> 
 
     Ok(())
 }
+
+pub(crate) fn unban_player(player: String) -> Result<(), String> {
+    let env = match get_env() {
+        Ok(env) => env,
+        Err(_) => {
+            return Err("Error getting env".to_string());
+        }
+    };
+
+    let player_string = match env.new_string(player) {
+        Ok(string) => string,
+        Err(e) => {
+            return Err(format!("Error creating player string: {}", e));
+        }
+    };
+
+    let player_arg = JValue::Object(&player_string);
+
+
+    let bukkit = match get_bukkit() {
+        Ok(bukkit) => bukkit,
+        Err(_) => {
+            return Err("Error getting bukkit".to_string());
+        }
+    };
+
+    let fns = [
+        JniFn {
+            name: "getPlayer",
+            input: &[JSTRING],
+            output: "Lorg/bukkit/entity/Player;",
+            args: &[player_arg],
+        },
+        JniFn {
+            name: "unbanPlayer",
+            input: &[],
+            output: JVOID,
+            args: &[],
+        }
+    ];
+
+    call_static_stacking(&bukkit, &fns);
+
+
+    Ok(())
+
+}
