@@ -6,7 +6,6 @@ use crate::handlers::bukkit::get_bukkit;
 
 //TODO: Bot => Server: SendPlayers
 //TODO: Bot => Server: KickPlayer          ✅
-//TODO: Bot => Server: ReportPlayer
 //TODO: Bot => Server: BanPlayer           ✅
 //TODO: Bot => Server: UnbanPlayer
 
@@ -131,7 +130,7 @@ pub(crate) fn ban_player(player: String, reason: String, is_component: bool) -> 
 }
 
 pub(crate) fn unban_player(player: String) -> Result<(), String> {
-    let env = match get_env() {
+    let mut env = match get_env() {
         Ok(env) => env,
         Err(_) => {
             return Err("Error getting env".to_string());
@@ -145,9 +144,6 @@ pub(crate) fn unban_player(player: String) -> Result<(), String> {
         }
     };
 
-    let player_arg = JValue::Object(&player_string);
-
-
     let bukkit = match get_bukkit() {
         Ok(bukkit) => bukkit,
         Err(_) => {
@@ -155,24 +151,33 @@ pub(crate) fn unban_player(player: String) -> Result<(), String> {
         }
     };
 
-    let fns = [
+    let ban_list_type = match env.find_class("org/bukkit/BanList/Type/NAME"){
+        Ok(class) => class,
+        Err(e) => {
+            return Err(format!("Error getting BanList class: {}", e));
+        }
+    };
+
+    let ban_list_arg = JValue::Object(&ban_list_type);
+
+    let player_arg = JValue::Object(&player_string);
+
+    let pardon_fns = [
         JniFn {
-            name: "getPlayer",
-            input: &[JSTRING],
-            output: "Lorg/bukkit/entity/Player;",
-            args: &[player_arg],
+            name: "getBanList",
+            input: &["org.bukkit.BanList.Type"],
+            output: "org.bukkit.BanList",
+            args: &[ban_list_arg],
         },
         JniFn {
-            name: "unbanPlayer",
-            input: &[],
+            name: "pardon",
+            input: &[JSTRING],
             output: JVOID,
-            args: &[],
+            args: &[player_arg],
         }
     ];
 
-    call_static_stacking(&bukkit, &fns);
-
+    call_static_stacking(&bukkit, &pardon_fns);
 
     Ok(())
-
 }
