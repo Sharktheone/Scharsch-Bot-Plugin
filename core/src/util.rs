@@ -24,6 +24,20 @@ pub(crate) fn extract_player(event: &JObject) -> String {
     convert_string(&player_obj)
 }
 
+pub(crate) fn extract_name_from_player(event: &JObject) -> String {
+    let fns = [
+        JniFn {
+            name: "getName",
+            input: &[],
+            output: JSTRING,
+            args: &[],
+        }
+    ];
+    let player_obj = call_stacking(event, &fns);
+
+    convert_string(&player_obj)
+}
+
 pub(crate) fn extract_message(event: &JObject) -> String {
     let fns = [
         JniFn {
