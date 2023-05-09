@@ -151,21 +151,26 @@ pub(crate) fn unban_player(player: String) -> Result<(), String> {
         }
     };
 
-    let ban_list_type = match env.find_class("org/bukkit/BanList/Type/NAME"){
+    let ban_list_type = match env.find_class("org/bukkit/BanList$Type"){
         Ok(class) => class,
         Err(e) => {
             return Err(format!("Error getting BanList class: {}", e));
         }
     };
 
-    let ban_list_arg = JValue::Object(&ban_list_type);
+    let ban_list_name_args = env.new_string("NAME").unwrap();
+
+    let ban_list_name = env.call_static_method(ban_list_type, "valueOf", "(Ljava/lang/String;)Lorg/bukkit/BanList$Type;", &[JValue::Object(&ban_list_name_args)]).unwrap().l().unwrap();
+
+
+    let ban_list_arg = JValue::Object(&ban_list_name);
 
     let player_arg = JValue::Object(&player_string);
 
     let pardon_fns = [
         JniFn {
             name: "getBanList",
-            input: &["org.bukkit.BanList.Type"],
+            input: &["Lorg/bukkit/BanList$Type;"],
             output: "org.bukkit.BanList",
             args: &[ban_list_arg],
         },
