@@ -1,15 +1,16 @@
-use jni::objects::{JString, JValue};
+use jni::objects::{JObjectArray, JString, JValue};
 use scharschbot_core::jni_utils::{call_static_stacking, get_env, JniFn, JSTRING, JVOID};
 use scharschbot_core::plugin::kyori_adventure::component::basic_component;
 use scharschbot_core::plugin::kyori_adventure::parse_component::{parse_component, parse_component_to_legacy};
 use crate::handlers::bukkit::get_bukkit;
+use crate::util::extract_name_from_player;
 
 //TODO: Bot => Server: SendPlayers
 //TODO: Bot => Server: KickPlayer          ✅
 //TODO: Bot => Server: BanPlayer           ✅
-//TODO: Bot => Server: UnbanPlayer
+//TODO: Bot => Server: UnbanPlayer         ✅
 
-pub(crate) fn kick_player(player: String, reason: String, is_component: bool) -> Result<(), String>{
+pub(crate) fn kick_player(player: String, reason: String, is_component: bool) -> Result<(), String> {
     let env = match get_env() {
         Ok(env) => env,
         Err(_) => {
@@ -24,10 +25,10 @@ pub(crate) fn kick_player(player: String, reason: String, is_component: bool) ->
         }
     };
 
-    let component = match parse_component(reason, is_component){
+    let component = match parse_component(reason, is_component) {
         Ok(component) => component,
         Err(_) => {
-            match basic_component("Failed to parse reason, please contact the support for more information".to_string()){
+            match basic_component("Failed to parse reason, please contact the support for more information".to_string()) {
                 Ok(component) => component,
                 Err(_) => {
                     return Err("Error parsing reason".to_string());
@@ -37,7 +38,7 @@ pub(crate) fn kick_player(player: String, reason: String, is_component: bool) ->
     };
 
 
-    let kick_arg =  JValue::Object(&component);
+    let kick_arg = JValue::Object(&component);
 
 
     let player_string = match env.new_string(player) {
@@ -76,10 +77,10 @@ pub(crate) fn ban_player(player: String, reason: String, is_component: bool) -> 
         }
     };
 
-    let component = match parse_component_to_legacy(reason, is_component){
+    let component = match parse_component_to_legacy(reason, is_component) {
         Ok(component) => component,
         Err(_) => {
-            let obj = match basic_component("Failed to parse reason, please contact the support for more information".to_string()){
+            let obj = match basic_component("Failed to parse reason, please contact the support for more information".to_string()) {
                 Ok(component) => component,
                 Err(_) => {
                     return Err("Error parsing reason".to_string());
@@ -151,7 +152,7 @@ pub(crate) fn unban_player(player: String) -> Result<(), String> {
         }
     };
 
-    let ban_list_type = match env.find_class("org/bukkit/BanList$Type"){
+    let ban_list_type = match env.find_class("org/bukkit/BanList$Type") {
         Ok(class) => class,
         Err(e) => {
             return Err(format!("Error getting BanList class: {}", e));
@@ -185,4 +186,61 @@ pub(crate) fn unban_player(player: String) -> Result<(), String> {
     call_static_stacking(&bukkit, &pardon_fns);
 
     Ok(())
+}
+
+pub(crate) fn send_players() -> Result<Vec<String>, String> {
+    let mut env = match get_env() {
+        Ok(env) => env,
+        Err(_) => {
+            return Err("Error getting env".to_string());
+        }
+    };
+
+    let bukkit = match get_bukkit() {
+        Ok(bukkit) => bukkit,
+        Err(_) => {
+            return Err("Error getting bukkit".to_string());
+        }
+    };
+
+    let fns = [
+        JniFn {
+            name: "getOnlinePlayers",
+            input: &[],
+            output: "java.util.Collection",
+            args: &[],
+        },
+        JniFn{
+            name: "toArray",
+            input: &[],
+            output: "[Ljava/lang/Object;",
+            args: &[],
+        }
+    ];
+
+    let players_obj = call_static_stacking(&bukkit, &fns);
+
+    let players_array:JObjectArray = JObjectArray::from(players_obj);
+
+    let len = match env.get_array_length(&players_array) {
+        Ok(len) => len,
+        Err(e) => {
+            return Err(format!("Error getting array length: {}", e));
+        }
+    };
+
+    let mut players = Vec::with_capacity(len as usize);
+
+    for i in 0..len {
+        let player = match env.get_object_array_element(&players_array, i) {
+            Ok(player) => player,
+            Err(e) => {
+                return Err(format!("Error getting player: {}", e));
+            }
+        };
+        let player = extract_name_from_player(&player);
+        players.push(player);
+    }
+
+    Ok(players)
 }
