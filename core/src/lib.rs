@@ -14,6 +14,7 @@ use scharschbot_core::websocket::websocket::connect_ws;
 use scharschbot_core::plugin::logger::{info, error, logger_pump};
 use scharschbot_core::events::mc_events::{player_join, player_leave, player_chat, player_death, player_advancement};
 use scharschbot_core::jni_utils::{set_class, set_vm};
+use crate::handlers::players::{ban_player, kick_player, send_players, unban_player};
 use crate::util::{extract_death_message, extract_message, extract_player, get_server_name, extract_advancement};
 use crate::handlers::whitelist::{whitelist_add, whitelist_remove};
 
@@ -33,10 +34,10 @@ pub extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNIEnv, cl
     thread::spawn(move || {
         thread::sleep(Duration::from_millis(10)); // Wait for the logger_pump to be initialized
         let handlers = Handlers {
-            get_players_handler: None,
-            kick_player: None,
-            ban_player: None,
-            unban_player: None,
+            get_players_handler: Some(&send_players),
+            kick_player: Some(&kick_player),
+            ban_player: Some(&ban_player),
+            unban_player: Some(&unban_player),
             send_command: None,
             send_message: None,
             send_admin_message: None,
