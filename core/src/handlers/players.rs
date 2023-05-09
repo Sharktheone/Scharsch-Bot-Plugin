@@ -117,8 +117,8 @@ pub(crate) fn ban_player(player: String, reason: String, is_component: bool) -> 
         },
         JniFn {
             name: "banPlayer",
-            input: &["Lnet/kyori/adventure/text/Component;"],
-            output: JVOID,
+            input: &[JSTRING],
+            output: "org.bukkit.BanEntry",
             args: &[ban_arg],
         }
     ];
