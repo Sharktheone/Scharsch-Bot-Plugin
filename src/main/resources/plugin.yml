@@ -2,3 +2,8 @@ name: ScharschBot
 version: '${project.version}'
 main: de.scharschbot.plugin.Plugin
 api-version: 1.19
+
+permissions:
+  scharschbot.admin:
+    default: op
+    description: Allows the user to use receive admin messages of the plugin
