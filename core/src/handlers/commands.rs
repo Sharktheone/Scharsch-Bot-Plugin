@@ -1,6 +1,6 @@
 //TODO: Bot => Server: SendCommand  ✅
 use jni::objects::JValue;
-use scharschbot_core::jni_utils::{call_static_stacking, get_env, JBOOLEAN, JniFn, JSTRING, make_signature};
+use scharschbot_core::jni_utils::{call_static_stacking, get_env, JniFn};
 use crate::handlers::bukkit::get_bukkit;
 
 pub(crate) fn send_command(command: String) -> Result<(), String> {

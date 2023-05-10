@@ -3,7 +3,7 @@
 
 use jni::objects::JValue;
 use scharschbot_core::events::message::{ERROR, Message, MessageData};
-use scharschbot_core::jni_utils::{get_env, JINT, JniFn};
+use scharschbot_core::jni_utils::{get_env};
 use scharschbot_core::plugin::kyori_adventure::parse_component::parse_component;
 use scharschbot_core::websocket::websocket::send;
 use crate::handlers::bukkit::get_bukkit;
@@ -60,7 +60,7 @@ pub(crate) fn send_message(message: String, is_component: bool) -> Result<(), St
     let _ = match env.call_static_method(&bukkit, "broadcast", "(Lnet/kyori/adventure/text/Component;)I", &[broadcast_arg]) {
         Ok(players_received) => match players_received.i() {
             Ok(players_received) => {
-                let players: i32 = players_received.into();
+                let players: i32 = players_received;
                 players
             },
             Err(e) => {
