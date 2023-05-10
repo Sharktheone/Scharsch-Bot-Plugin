@@ -123,10 +123,16 @@ pub(crate) fn send_admin_message(message: String, is_component: bool, permission
     };
 
     let broadcast_arg = JValue::Object(&component);
-    let permission_arg = match permission {
-        Some(permission) => JValue::Object(&parse_component(permission, false).unwrap()),
-        None => JValue::Object(&parse_component("scharschbot.admin".to_string(), false).unwrap()),
+    let permission = permission.unwrap_or("scharschbot.admin".to_string());
+
+    let permission_string = match env.new_string(permission) {
+        Ok(permission_string) =>  permission_string,
+        Err(e) => {
+            return Err(format!("Error creating permission string: {}", e));
+        }
     };
+
+    let permission_arg = JValue::Object(&permission_string);
 
     let _ = match env.call_static_method(&bukkit, "broadcast", "(Lnet/kyori/adventure/text/Component;Ljava/lang/String;)I", &[broadcast_arg, permission_arg]) {
         Ok(players_received) => match players_received.i() {
