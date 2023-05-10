@@ -18,7 +18,7 @@ use crate::handlers::chat::{send_admin_message, send_message};
 use crate::handlers::commands::send_command;
 use crate::handlers::players::{ban_player, kick_player, send_players, unban_player};
 use crate::util::{extract_death_message, extract_message, extract_player, get_server_name, extract_advancement};
-use crate::handlers::whitelist::{whitelist_add, whitelist_remove};
+use crate::handlers::whitelist::{whitelist_add, whitelist_remove, whitelisted_players};
 
 #[no_mangle]
 pub extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNIEnv, class: JClass<'static>) {
@@ -45,7 +45,7 @@ pub extern "C" fn Java_de_scharschbot_plugin_Events_onInitialize(env: JNIEnv, cl
             send_admin_message: Some(&send_admin_message),
             add_whitelist: Some(&whitelist_add),
             remove_whitelist: Some(&whitelist_remove),
-            whitelisted_players: None
+            whitelisted_players: Some(&whitelisted_players),
         };
         set_handlers(handlers);
 
