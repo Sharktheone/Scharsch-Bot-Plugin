@@ -168,3 +168,16 @@ fn print_whitelist_not_found() {
     ╰─────────────────────────────────────────────────────────────────╯"#;
     error(msg);
 }
+
+pub(crate) fn whitelisted_players() -> Result<Vec<String>, String> {
+    let whitelist = match get_whitelist() {
+        Ok(whitelist) => whitelist,
+        Err(_) => {
+            return Err("Error getting whitelist".to_string());
+        }
+    };
+
+    let whitelist_players = whitelist.iter().map(|entry| entry.name.clone()).collect::<Vec<String>>();
+
+    Ok(whitelist_players)
+}
